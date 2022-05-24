@@ -530,19 +530,19 @@ void PlaySong6(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect* atlas, fl
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 // –¿¡Œ“¿≈Ã
-void PlayItAgain(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chords_boj[], SDL_Renderer* renderer, SDL_Texture* texture, int *Isclosed, float Width, float Height
-    , Mix_Music* GuitarHero[], Mix_Music* GuitarReaction[])
+void PlayItAgain(Mix_Chunk* chords_real[], Mix_Chunk* chords_boj[], SDL_Renderer* renderer, SDL_Texture* texture, int *Isclosed, float Width, float Height
+    , Mix_Music* GuitarHero[], Mix_Music* GuitarReaction[], int TYPE)
 {
+    Mix_Chunk* chords[38];
+    AcousticORClassic(TYPE, chords);
     SDL_Surface* help_Surface = IMG_Load("./gamedata/textures/help_player.png");
     SDL_Texture* help_Texture = SDL_CreateTextureFromSurface(renderer, help_Surface);
     SDL_FreeSurface(help_Surface);
-    SDL_SetTextureBlendMode(help_Texture, SDL_BLENDMODE_BLEND);
     SDL_SetTextureAlphaMod(help_Texture, 150);
 
     SDL_Surface* play_it_Surface = IMG_Load("./gamedata/textures/play_it.png");
     SDL_Texture* play_it_Texture = SDL_CreateTextureFromSurface(renderer, play_it_Surface);
     SDL_FreeSurface(play_it_Surface);
-    SDL_SetTextureBlendMode(play_it_Texture, SDL_BLENDMODE_BLEND);
 
 
     SDL_Rect PlayBlocks[17];
@@ -1606,6 +1606,10 @@ void PlayItAgain(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chord
         }
         SDL_RenderPresent(renderer);
         SDL_RenderClear(renderer);
+    }
+    for (int i = 0; i < 38; i++)
+    {
+        Mix_FreeChunk(chords[i]);
     }
     SDL_DestroyTexture(help_Texture);
     SDL_DestroyTexture(play_it_Texture);

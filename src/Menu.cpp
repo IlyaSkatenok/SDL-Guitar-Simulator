@@ -4,8 +4,7 @@ void VolumeLevelChanger(int PositionX, int PositionTextureX, int TextureW, int* 
 {
 	// сколько занимает единица звук
 	float leveler = float(TextureW) / 128;
-
-	PositionX =  PositionX - PositionTextureX;
+	PositionX -=  PositionTextureX;
 	*positionXVolume = PositionTextureX + TextureW;
 	*positionXVolume -=  128 * leveler - PositionX ;
 	*CurrentVolume = float(PositionX) / leveler;
@@ -13,8 +12,8 @@ void VolumeLevelChanger(int PositionX, int PositionTextureX, int TextureW, int* 
 	Mix_VolumeMusic(*CurrentVolume);
 }
 
-void MenuSettings(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect* atlas, SDL_Rect* atlasScreen, int *Isclosed, SDL_Window* window, float* Width, float* Height, SDL_Rect* MenuBlocksScreenPos, 
-	int *MusicStopped, Mix_Music* MenuAmbient[], int* IsFull, int* CurrentVolume)
+void MenuSettings(SDL_Renderer* renderer, SDL_Texture*& texture, SDL_Rect* atlas, SDL_Rect* atlasScreen, int *Isclosed, SDL_Window* window, float* Width, float* Height, SDL_Rect* MenuBlocksScreenPos, 
+	int *MusicStopped, Mix_Music* MenuAmbient[], int* IsFull, int* CurrentVolume, int *THEME, int* TYPE, SDL_Surface* White, SDL_Surface* Black)
 {
 	SDL_Surface* Guitar_Surface = IMG_Load("./gamedata/textures/Guitar_BackGround3.png");
 	SDL_Texture* Guitar_Texture = SDL_CreateTextureFromSurface(renderer, Guitar_Surface);
@@ -24,11 +23,11 @@ void MenuSettings(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect* atlas,
 	int MouseClicked = 0;
 	int MenuChoosen = 6;
 
-	SDL_Rect Settings[7];
+	SDL_Rect Settings[9];
 	
 	InitSettingAtlasPositions(Settings);
 
-	SDL_Rect SettingsScreenPos[9];
+	SDL_Rect SettingsScreenPos[12];
 	
 	InitSettingTexturesPositions(SettingsScreenPos, atlasScreen, *Width, *Height);
 
@@ -46,7 +45,18 @@ void MenuSettings(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect* atlas,
 			SDL_RenderCopy(renderer, texture, &atlas[i], &atlasScreen[i]);
 		}
 		SDL_RenderCopy(renderer, texture, &atlas[10], &atlasScreen[7]);
+		SDL_RenderCopy(renderer, texture, &atlas[11], &atlasScreen[8]);
+		SDL_RenderCopy(renderer, texture, &atlas[12], &atlasScreen[9]);
 		SDL_RenderCopy(renderer, texture, &Settings[0], &SettingsScreenPos[0]);
+
+		if (*TYPE)
+		{
+			SDL_RenderCopy(renderer, texture, &Settings[8], &SettingsScreenPos[11]);
+		}
+		else
+		{
+			SDL_RenderCopy(renderer, texture, &Settings[7], &SettingsScreenPos[10]);
+		}
 		// Ёлипс громкости
 		SettingsScreenPos[6].x = 1250 * (*Width / 1920) + *CurrentVolume * (4.544 * *Width / 1920);
 		if (*Width / 1920 < 0.8)
@@ -78,7 +88,7 @@ void MenuSettings(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect* atlas,
 			{
 				if (MouseClicked)
 				{
-					for (int i = 0; i < 9; i++)
+					for (int i = 0; i < 12; i++)
 					{
 						if ((event.button.x >= SettingsScreenPos[i].x) && (event.button.x <= SettingsScreenPos[i].x + SettingsScreenPos[i].w)
 							&& (event.button.y >= SettingsScreenPos[i].y) && (event.button.y <= SettingsScreenPos[i].y + SettingsScreenPos[i].h))
@@ -137,6 +147,23 @@ void MenuSettings(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect* atlas,
 									SDL_SetWindowFullscreen(window, 0);
 								}
 								break;
+							case 9:
+								*THEME = !*THEME;
+								SDL_DestroyTexture(texture);
+								if (*THEME)
+								{
+									texture = SDL_CreateTextureFromSurface(renderer, Black);
+									SDL_SetRenderDrawColor(renderer, 165, 165, 165, 0);
+								}
+								else
+								{
+									texture = SDL_CreateTextureFromSurface(renderer, White);
+									SDL_SetRenderDrawColor(renderer, 215, 215, 215, 0);
+								}
+								break;
+							case 11:
+								*TYPE = !*TYPE;
+								break;
 							}
 						}
 
@@ -192,9 +219,17 @@ void MenuSettings(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect* atlas,
 }
 
 
-void MenuHelper(SDL_Renderer* renderer, float* Width, float* Height, int* Isclosed, int MusicStopped, Mix_Music* MenuAmbient[])
+void MenuHelper(SDL_Renderer* renderer, float* Width, float* Height, int* Isclosed, int MusicStopped, Mix_Music* MenuAmbient[], int *THEME)
 {
-	SDL_Surface* Help_Surface = IMG_Load("./gamedata/textures/Helper.png");
+	SDL_Surface* Help_Surface;
+	if (*THEME)
+	{
+		Help_Surface = IMG_Load("./gamedata/textures/Helper.png");
+	}
+	else
+	{
+		Help_Surface = IMG_Load("./gamedata/textures/Helper_light.png");
+	}
 	SDL_Texture* Help_Texture = SDL_CreateTextureFromSurface(renderer, Help_Surface);
 	SDL_FreeSurface(Help_Surface);
 
@@ -243,9 +278,13 @@ void MenuHelper(SDL_Renderer* renderer, float* Width, float* Height, int* Isclos
 }
 
 
-void MainMenu(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chords_boj[], SDL_Renderer* renderer, SDL_Texture* textureGame,float *Width, float *Height, SDL_Window* window
-	, int* VOLUME, int* FULL_SCREEN, int* MENU_AMBIENT)
+void MainMenu(Mix_Chunk* chords_real[], Mix_Chunk* chords_boj[], SDL_Renderer* renderer,float *Width, float *Height, SDL_Window* window
+	, int* VOLUME, int* FULL_SCREEN, int* MENU_AMBIENT, int* THEME, int* TYPE)
 {
+	SDL_Surface* Play_Surface = IMG_Load("./gamedata/textures/TTH.png");
+	SDL_Surface* Play_Surface2 = IMG_Load("./gamedata/textures/TTH_light.png");
+
+	SDL_Texture* Play_texture;
 
 	SDL_Surface* Cursor_Surface = IMG_Load("./gamedata/textures/Cursor.png");
 	SDL_Cursor* cursor = SDL_CreateColorCursor(Cursor_Surface, 0, 0);
@@ -292,17 +331,15 @@ void MainMenu(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chords_b
 		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 	}
 	//
-
 	SDL_Surface* Menu_Surface = IMG_Load("./gamedata/textures/Menu.png");
+	SDL_Surface* Menu_Surface2 = IMG_Load("./gamedata/textures/Menu_light.png");
 	SDL_Texture* Menu_Texture = SDL_CreateTextureFromSurface(renderer, Menu_Surface);
-	SDL_FreeSurface(Menu_Surface);
-	SDL_SetTextureBlendMode(Menu_Texture, SDL_BLENDMODE_BLEND);
 
-	SDL_Rect MenuBlocks[11];
+	SDL_Rect MenuBlocks[13];
 
 	InitMenuAtlasPositions(MenuBlocks);
 
-	SDL_Rect MenuBlocksScreenPos[8];
+	SDL_Rect MenuBlocksScreenPos[10];
 
 	InitMenuTexturesPositions(MenuBlocksScreenPos,*Width, *Height);
 
@@ -310,16 +347,24 @@ void MainMenu(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chords_b
 	SDL_Surface* Guitar_Surface = IMG_Load("./gamedata/textures/Guitar_BackGround2.png");
 	SDL_Texture* Guitar_Texture = SDL_CreateTextureFromSurface(renderer, Guitar_Surface);
 	SDL_FreeSurface(Guitar_Surface);
-	SDL_SetTextureBlendMode(Guitar_Texture, SDL_BLENDMODE_BLEND);
 
 	SDL_Surface* LOGO_Surface = IMG_Load("./gamedata/textures/LOGO2.png");
 	SDL_Texture* LOGO_Texture = SDL_CreateTextureFromSurface(renderer, LOGO_Surface);
 	SDL_FreeSurface(LOGO_Surface);
-	SDL_SetTextureBlendMode(LOGO_Texture, SDL_BLENDMODE_BLEND);
 	SDL_Rect LOGO_RECT = { MenuBlocksScreenPos[0].x - 220 * (*Width / 1920),MenuBlocksScreenPos[3].y - 200 * (*Height / 1080),983 * (*Width / 1920), 200 * (*Height / 1080)};
+	if (*THEME)
+	{
+		Menu_Texture = SDL_CreateTextureFromSurface(renderer, Menu_Surface);
+		Play_texture = SDL_CreateTextureFromSurface(renderer, Play_Surface);
+		SDL_SetRenderDrawColor(renderer, 165, 165, 165, 0);
+	}
+	else
+	{
+		Menu_Texture = SDL_CreateTextureFromSurface(renderer, Menu_Surface2);
+		Play_texture = SDL_CreateTextureFromSurface(renderer, Play_Surface2);
+		SDL_SetRenderDrawColor(renderer, 215, 215, 215, 0);
+	}
 
-
-	int Menu = 0;
 	int MouseClicked = 0;
 	int WindowClosed = 0;
 
@@ -363,23 +408,32 @@ void MainMenu(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chords_b
 							{
 							case 0:
 								quit = true;
-								SDL_DestroyTexture(Menu_Texture);
 								break;
 							case 1:
 								SDL_RenderClear(renderer);
 								MenuSettings(renderer, Menu_Texture, MenuBlocks, MenuBlocksScreenPos,  &WindowClosed, window, Width, Height, MenuBlocksScreenPos, 
-									MENU_AMBIENT, MenuAmbient, FULL_SCREEN, VOLUME);
+									MENU_AMBIENT, MenuAmbient, FULL_SCREEN, VOLUME, THEME, TYPE, Menu_Surface2, Menu_Surface);
 								if (WindowClosed)
 								{
 									quit = true;
 								}
+								SDL_DestroyTexture(Play_texture);
+								cout << *THEME << endl;
+								if (*THEME)
+								{
+									Play_texture = SDL_CreateTextureFromSurface(renderer, Play_Surface);
+								}
+								else
+								{
+									Play_texture = SDL_CreateTextureFromSurface(renderer, Play_Surface2);
+								}
 								LOGO_RECT = { int(MenuBlocksScreenPos[0].x - 220 * (*Width / 1920)),int(MenuBlocksScreenPos[3].y - 200 * (*Height / 1080)), int(983 * (*Width / 1920)), int(200 * (*Height / 1080)) };
-								i = 5;
 								break;
 							case 2:
 								SDL_RenderClear(renderer);
 								Mix_HaltMusic();
-								PlayItAgain(chords, chords_real, chords_boj, renderer, textureGame,  &WindowClosed, *Width, *Height, GuitarHero, GuitarHeroReaction);
+								PlayItAgain(chords_real, chords_boj, renderer, Play_texture,  &WindowClosed, *Width, *Height, 
+									GuitarHero, GuitarHeroReaction, *TYPE);
 								if (WindowClosed)
 								{
 									quit = true;
@@ -388,7 +442,7 @@ void MainMenu(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chords_b
 								break;
 							case 3:
 								SDL_RenderClear(renderer);
-								MenuHelper(renderer, Width,Height, &WindowClosed, *MENU_AMBIENT, MenuAmbient);
+								MenuHelper(renderer, Width,Height, &WindowClosed, *MENU_AMBIENT, MenuAmbient, THEME);
 								if (WindowClosed)
 								{
 									quit = true;

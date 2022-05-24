@@ -11,13 +11,12 @@ int initialization()
     return 0;
 }
 
-void GetInfoFromFile(int *WIDTH, int *HEIGHT, int *VOLUME, int *FULL_SCREEN, int *MENU_AMBIENT)
+void GetInfoFromFile(int *WIDTH, int *HEIGHT, int *VOLUME, int *FULL_SCREEN, int *MENU_AMBIENT, int *THEME, int *TYPE)
 {
     string line;
-    int DATA[4];
-    string DATADocs[4] = { " ;  Разрешение экрана"," ;   Вкл/Выкл музыка в меню", " ;   Полный экран или нет", " ;  Громкость звука"};
+    int DATA[6];
     int i = 0;
-    ifstream in("./gamedata/configs/Menu_cfg.txt"); // окрываем файл для чтения
+    ifstream in("./gamedata/configs/Menu_cfg.txt");
     if (in.is_open())
     {
         while (getline(in, line))
@@ -27,12 +26,12 @@ void GetInfoFromFile(int *WIDTH, int *HEIGHT, int *VOLUME, int *FULL_SCREEN, int
             line.clear();
         }
     }
-    in.close();     // закрываем файл
-    
+    in.close();
     *MENU_AMBIENT = DATA[1];
     *FULL_SCREEN = DATA[2];
     *VOLUME = DATA[3];
-
+    *THEME = DATA[4];
+    *TYPE = DATA[5];
     switch (DATA[0])
     {
     case 0:
@@ -52,10 +51,9 @@ void GetInfoFromFile(int *WIDTH, int *HEIGHT, int *VOLUME, int *FULL_SCREEN, int
         *HEIGHT = 768;
         break;
     }
-
 }
 
-void SaveInfoInFile(int WIDTH, int VOLUME, int FULL_SCREEN, int MENU_AMBIENT)
+void SaveInfoInFile(int WIDTH, int VOLUME, int FULL_SCREEN, int MENU_AMBIENT, int THEME, int TYPE)
 {
     int Size = 0;
     switch (WIDTH)
@@ -73,14 +71,14 @@ void SaveInfoInFile(int WIDTH, int VOLUME, int FULL_SCREEN, int MENU_AMBIENT)
         Size = 3;
         break;
     }
-    int DATA[4] = { Size, MENU_AMBIENT, FULL_SCREEN, VOLUME};
-    string DATADocs[4] = { " ;  Разрешение экрана"," ;   Вкл/Выкл музыка в меню", " ;   Полный экран или нет", " ;  Громкость звука" };
+    int DATA[5] = { Size, MENU_AMBIENT, FULL_SCREEN, VOLUME, THEME};
+    string DATADocs[6] = { " ;  Разрешение экрана"," ;   Вкл/Выкл музыка в меню", " ;   Полный экран или нет", " ;  Громкость звука", " ;   Темная/Светлая тема", " ;   Классическая/Акустическая гитара" };
     int i = 0;
     ofstream out;          // поток для записи
     out.open("./gamedata/configs/Menu_cfg.txt"); // окрываем файл для записи
     if (out.is_open())
     {
-        while (i < 4)
+        while (i < 6)
         {
             out << DATA[i] << DATADocs[i] << endl;
             i++;
@@ -137,6 +135,18 @@ void InitMenuTexturesPositions(SDL_Rect* MenuBlocksScreenPos, float Width, float
     MenuBlocksScreenPos[7].h = 70 * (Height / 1080);
     MenuBlocksScreenPos[7].x = MenuBlocksScreenPos[6].x;
     MenuBlocksScreenPos[7].y = MenuBlocksScreenPos[6].y + MenuBlocksScreenPos[6].h + 5;
+
+    // Смена темы
+    MenuBlocksScreenPos[8].w = 562 * (Width / 1920);
+    MenuBlocksScreenPos[8].h = 70 * (Height / 1080);
+    MenuBlocksScreenPos[8].x = MenuBlocksScreenPos[6].x;
+    MenuBlocksScreenPos[8].y = MenuBlocksScreenPos[7].y + MenuBlocksScreenPos[7].h + 5;
+
+    // Типа гитары
+    MenuBlocksScreenPos[9].w = 562 * (Width / 1920);
+    MenuBlocksScreenPos[9].h = 70 * (Height / 1080);
+    MenuBlocksScreenPos[9].x = MenuBlocksScreenPos[6].x;
+    MenuBlocksScreenPos[9].y = MenuBlocksScreenPos[8].y + MenuBlocksScreenPos[8].h + 5;
 }
 
 void InitMenuAtlasPositions(SDL_Rect* MenuBlocks)
@@ -179,15 +189,15 @@ void InitMenuAtlasPositions(SDL_Rect* MenuBlocks)
 
 	// Музыка в меню
 	MenuBlocks[6].x = 637;
-	MenuBlocks[6].y = 680;
+	MenuBlocks[6].y = 670;
 	MenuBlocks[6].w = 562;
 	MenuBlocks[6].h = 70;
 
 	// Ползунок уровня громкости
-	MenuBlocks[7].x = 1301;
-	MenuBlocks[7].y = 518;
+	MenuBlocks[7].x = 1283;
+	MenuBlocks[7].y = 509;
 	MenuBlocks[7].w = 24;
-	MenuBlocks[7].h = 91;
+	MenuBlocks[7].h = 90;
 
 	// Крестик для вкл/выкл музыки
 	MenuBlocks[8].x = 1218;
@@ -203,9 +213,21 @@ void InitMenuAtlasPositions(SDL_Rect* MenuBlocks)
 
     // Полноэкранный режим
     MenuBlocks[10].x = 637;
-    MenuBlocks[10].y = 752;
+    MenuBlocks[10].y = 742;
     MenuBlocks[10].w = 562;
     MenuBlocks[10].h = 70;
+
+    // Смена темы
+    MenuBlocks[11].x = 637;
+    MenuBlocks[11].y = 816;
+    MenuBlocks[11].w = 562;
+    MenuBlocks[11].h = 70;
+
+    // Тип гитары
+    MenuBlocks[12].x = 637;
+    MenuBlocks[12].y = 888;
+    MenuBlocks[12].w = 562;
+    MenuBlocks[12].h = 70;
 }
 
 void InitPlayTexturesPositions(SDL_Rect* PlayBlocksScreenPos, float Width, float Height)
@@ -324,10 +346,22 @@ void InitSettingAtlasPositions(SDL_Rect* Settings)
     Settings[5].h = 44;
 
     // Элипс для показа громкости
-    Settings[6].x = 1301;
+    Settings[6].x = 1283;
     Settings[6].y = 519;
     Settings[6].w = 24;
-    Settings[6].h = 89;
+    Settings[6].h = 90;
+
+    // Тип гитары классика
+    Settings[7].x = 677;
+    Settings[7].y = 394;
+    Settings[7].w = 266;
+    Settings[7].h = 43;
+
+    // Тип гитары акустика
+    Settings[8].x = 976;
+    Settings[8].y = 394;
+    Settings[8].w = 270;
+    Settings[8].h = 43;
 }
 
 void InitSettingTexturesPositions(SDL_Rect* SettingsScreenPos, SDL_Rect* atlasScreen,float Width, float Height)
@@ -385,6 +419,24 @@ void InitSettingTexturesPositions(SDL_Rect* SettingsScreenPos, SDL_Rect* atlasSc
     SettingsScreenPos[8].h = 44 * (Height / 1080);
     SettingsScreenPos[8].x = SettingsScreenPos[7].x;
     SettingsScreenPos[8].y = SettingsScreenPos[6].y + 213 * (Height / 1080);
+
+    // Элипс смены темы
+    SettingsScreenPos[9].w = 334 * (Width / 1920);
+    SettingsScreenPos[9].h = 40 * (Height / 1080);
+    SettingsScreenPos[9].x = SettingsScreenPos[7].x - SettingsScreenPos[9].w + 52 * (Width / 1920);
+    SettingsScreenPos[9].y = SettingsScreenPos[8].y + 80 * (Height / 1080);
+
+    // Тип гитары - КЛАССИКА
+    SettingsScreenPos[10].w = 266 * (Width / 1920);
+    SettingsScreenPos[10].h = 43 * (Height / 1080);
+    SettingsScreenPos[10].x = 1475 * (Width / 1920);
+    SettingsScreenPos[10].y = 965 * (Height / 1080);
+
+    // Тип гитары - АКУСТИКА
+    SettingsScreenPos[11].w = 270 * (Width / 1920);
+    SettingsScreenPos[11].h = 43 * (Height / 1080);
+    SettingsScreenPos[11].x = 1475 * (Width / 1920);
+    SettingsScreenPos[11].y = 965 * (Height / 1080);
 }
 
 void InitPlayAtlasPositions(SDL_Rect* PlayBlocks)

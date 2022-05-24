@@ -5,64 +5,8 @@ int main(int argc, char* argv[])
 {
     setlocale(LC_ALL, "Russian");
     initialization();
-    SDL_Surface* Play_Surface = IMG_Load("./gamedata/textures/TTH.png");
-
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
-    Mix_Chunk* chords[38] = {
-        // 1 бвагЭР (0 - 13)
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f1.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f2.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f3.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f4.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f5.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f6.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f7.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f8.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f9.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f10.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f11.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f12.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f13.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/f14.wav"),
-        //
-        // 2 бђ№ѓэр (14 - 27) 14 - 18
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/h1.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/h2.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/h3.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/h4.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/h5.wav"),
-        // 
-        // 3 бвагЭР (28 - 41) 19 - 22
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/g1.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/g2.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/g3.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/g4.wav"),
-        // 
-        // 4 бвагЭР (42 - 55) 23 - 27
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/d1.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/d2.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/d3.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/d4.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/d5.wav"),
-        //
-        // 5 бвагЭР (56 - 69) 28 - 32
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/a1.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/a2.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/a3.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/a4.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/a5.wav"),
-
-        // 
-        // 6 бвагЭР(70 - 83) 33 - 37
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/e1.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/e2.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/e3.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/e4.wav"),
-        Mix_LoadWAV("./gamedata/sounds/guitar/acoustic/e5.wav"),
-        // 
-    };
-
     Mix_Chunk* chords_real[42] = {
         // C D E F G A B
         Mix_LoadWAV("./gamedata/sounds/chords/C.wav"),               // 0
@@ -133,8 +77,10 @@ int main(int argc, char* argv[])
     int VOLUME;
     int FULL_SCREEN;
     int MENU_AMBIENT;
+    int THEME;
+    int TYPE;
 
-    GetInfoFromFile(&WIDTH, &HEIGHT, &VOLUME, &FULL_SCREEN, &MENU_AMBIENT);
+    GetInfoFromFile(&WIDTH, &HEIGHT, &VOLUME, &FULL_SCREEN, &MENU_AMBIENT, &THEME, &TYPE);
 
     Mix_Volume(-1, VOLUME);
     Mix_VolumeMusic(VOLUME);
@@ -144,10 +90,6 @@ int main(int argc, char* argv[])
     window = SDL_CreateWindow(TITLE,15, 15, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
-
-    SDL_Texture* Play_texture = SDL_CreateTextureFromSurface(renderer, Play_Surface);
-    SDL_FreeSurface(Play_Surface);
-    SDL_SetTextureBlendMode(Play_texture, SDL_BLENDMODE_BLEND);
 //--------------------------------------------
     
     float pseudoWidth = WIDTH;
@@ -157,11 +99,10 @@ int main(int argc, char* argv[])
     SDL_RenderClear(renderer);
     bool quit = false;
 
-    MainMenu(chords, chords_real, chords_boj, renderer, Play_texture, &pseudoWidth, &pseudoHeight, window, &VOLUME, &FULL_SCREEN, &MENU_AMBIENT);
-    SaveInfoInFile(int(pseudoWidth), VOLUME, FULL_SCREEN, MENU_AMBIENT);
+    MainMenu(chords_real, chords_boj, renderer, &pseudoWidth, &pseudoHeight, window, &VOLUME, &FULL_SCREEN, &MENU_AMBIENT, &THEME, &TYPE);
+    SaveInfoInFile(int(pseudoWidth), VOLUME, FULL_SCREEN, MENU_AMBIENT, THEME, TYPE);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
-    SDL_DestroyTexture(Play_texture);
     IMG_Quit();
     Mix_Quit();
     SDL_Quit();

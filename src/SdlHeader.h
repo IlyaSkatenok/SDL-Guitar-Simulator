@@ -11,10 +11,11 @@ using namespace std;
 int initialization();
 
 
-void MainMenu(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chords_boj[], SDL_Renderer* renderer, SDL_Texture* textureGame,float* Width, float* Height, SDL_Window* window
-	, int* VOLUME, int* FULL_SCREEN, int* MENU_AMBIENT);
+void MainMenu(Mix_Chunk* chords_real[], Mix_Chunk* chords_boj[], SDL_Renderer* renderer,float* Width, float* Height, SDL_Window* window
+	, int* VOLUME, int* FULL_SCREEN, int* MENU_AMBIENT, int* THEME, int* TYPE);
 
-void PlayItAgain(Mix_Chunk* chords[], Mix_Chunk* chords_real[], Mix_Chunk* chords_boj[],SDL_Renderer* renderer, SDL_Texture* texture, int *Isclosed, float Width, float Height, Mix_Music* GuitarHero[], Mix_Music* GuitarReaction[]);
+void PlayItAgain(Mix_Chunk* chords_real[], Mix_Chunk* chords_boj[],SDL_Renderer* renderer, SDL_Texture* texture, int *Isclosed, float Width, float Height, 
+	Mix_Music* GuitarHero[], Mix_Music* GuitarReaction[], int TYPE);
 //
 
 void InitPlayAtlasPositions(SDL_Rect* PlayBlocks);
@@ -29,6 +30,8 @@ void InitSettingTexturesPositions(SDL_Rect* SettingsScreenPos, SDL_Rect* atlasSc
 
 void InitPlayTexturesPositions(SDL_Rect* PlayBlocksScreenPos, float Width, float Height);
 
-void GetInfoFromFile(int* WIDTH, int* HEIGHT, int* VOLUME, int* FULL_SCREEN, int* MENU_AMBIENT);
+void GetInfoFromFile(int* WIDTH, int* HEIGHT, int* VOLUME, int* FULL_SCREEN, int* MENU_AMBIENT, int* THEME, int* TYPE);
 
-void SaveInfoInFile(int WIDTH, int VOLUME, int FULL_SCREEN, int MENU_AMBIENT);
+void SaveInfoInFile(int WIDTH, int VOLUME, int FULL_SCREEN, int MENU_AMBIENT, int THEME, int TYPE);
+
+void AcousticORClassic(int TYPE, Mix_Chunk* chords[]);
